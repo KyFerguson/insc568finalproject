@@ -1,0 +1,11 @@
+{
+  "courseScheduleID": "INSC 568 F2026",
+  "courseID": "INSC 568",
+  "semester": "F2026",
+  "scheduleTime": "10:00 AM",
+  "location": "Room 101",
+  "capacity": "30",
+  "facultyID": "123456789",
+  "specialNeeds": "N/A",
+  "availability": true
+}
