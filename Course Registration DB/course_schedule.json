@@ -1,11 +1,18 @@
 {
-  "courseScheduleID": "INSC 568 F2026",
-  "courseID": "INSC 568",
-  "semester": "F2026",
-  "scheduleTime": "10:00 AM",
-  "location": "Room 101",
-  "capacity": "30",
-  "facultyID": "123456789",
-  "specialNeeds": "N/A",
-  "availability": true
+  "courseSchedules": [
+    {
+      "courseScheduleID": "INSC 568 F2026",
+      "courseID": "INSC 568",
+      "semester": "F2026",
+      "scheduleTime": "10:00 AM",
+      "location": "Room 101",
+      "capacity": 30,
+      "enrolledCount": 0,
+      "facultyID": "123456789",
+      "specialNeeds": "N/A",
+      "availability": true,
+      "createdAt": "2026-04-17T10:00:00Z",
+      "updatedAt": "2026-04-17T10:00:00Z"
+    }
+  ]
 }

@@ -1,17 +1,25 @@
-[
-  {
-    "academicStatusID": "1",
-    "remark": "",
-    "statusType": "admitted"
-  },
-  {
-    "academicStatusID": "2",
-    "statusType": "probation",
-    "remark": ""
-  },
-  {
-    "academicStatusID": "3",
-    "statusType": "enrolled",
-    "remark": ""
-  }
-]
+{
+  "academicStatuses": [
+    {
+      "academicStatusID": "1",
+      "statusType": "admitted",
+      "remark": "",
+      "createdAt": "2026-04-17T10:00:00Z",
+      "updatedAt": "2026-04-17T10:00:00Z"
+    },
+    {
+      "academicStatusID": "2",
+      "statusType": "probation",
+      "remark": "",
+      "createdAt": "2026-04-17T10:00:00Z",
+      "updatedAt": "2026-04-17T10:00:00Z"
+    },
+    {
+      "academicStatusID": "3",
+      "statusType": "enrolled",
+      "remark": "",
+      "createdAt": "2026-04-17T10:00:00Z",
+      "updatedAt": "2026-04-17T10:00:00Z"
+    }
+  ]
+}

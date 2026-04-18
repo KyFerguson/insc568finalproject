@@ -1,5 +1,13 @@
 {
-  "id": "",
-  "credit": "",
-  "feeID": ""
+  "enrollments": [
+    {
+      "enrollmentId": "ENR001",
+      "studentId": "STU001",
+      "courseScheduleId": "INSC 568 F2026",
+      "credit": 3,
+      "feeID": "FEE001",
+      "createdAt": "2026-04-17T10:00:00Z",
+      "updatedAt": "2026-04-17T10:00:00Z"
+    }
+  ]
 }

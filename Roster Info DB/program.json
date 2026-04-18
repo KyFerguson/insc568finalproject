@@ -1,6 +1,12 @@
 {
-  "programID": "INSC",
-  "name": "Information Systems",
-  "department": "Engineering",
-  "college": "Engineering"
+  "programs": [
+    {
+      "programID": "INSC",
+      "name": "Information Systems",
+      "department": "Engineering",
+      "college": "Engineering",
+      "createdAt": "2026-04-17T10:00:00Z",
+      "updatedAt": "2026-04-17T10:00:00Z"
+    }
+  ]
 }

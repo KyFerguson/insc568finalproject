@@ -1,13 +1,19 @@
 {
-  "stuId": "",
-  "name": "William Nylander",
-  "SSN": "   ",
-  "emailAddress": "williamNylander@psu.edu",
-  "homePhone": "",
-  "localAddr":"",
-  "homeAddr": "  ",
-  "emergencyContact": "",
-  "programID": "",
-  "paymentID": "",
-  "academicStatusID": ""
+  "students": [
+    {
+      "stuId": "STU001",
+      "name": "William Nylander",
+      "SSN": "",
+      "emailAddress": "williamNylander@psu.edu",
+      "homePhone": "",
+      "localAddr": "",
+      "homeAddr": "",
+      "emergencyContact": "",
+      "programID": "",
+      "paymentID": "",
+      "academicStatusID": "",
+      "createdAt": "2026-04-17T10:00:00Z",
+      "updatedAt": "2026-04-17T10:00:00Z"
+    }
+  ]
 }

@@ -1,6 +1,12 @@
 {
-  "courseID": "INSC 568",
-  "courseName": "Software Engineering",
-  "sectionNo": 1,
-  "prerequisite": "CSCI 101"
+  "courses": [
+    {
+      "courseID": "INSC 568",
+      "courseName": "Software Engineering",
+      "sectionNo": 1,
+      "prerequisite": "CSCI 101",
+      "createdAt": "2026-04-17T10:00:00Z",
+      "updatedAt": "2026-04-17T10:00:00Z"
+    }
+  ]
 }

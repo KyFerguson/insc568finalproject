@@ -1,7 +1,13 @@
 {
-  "studentCourseID": "123456789",
-  "studentId": "123456789",
-  "courseScheduleId": "CSCI101",
-  "paid": true,
-  "grade": "3.86"
+  "studentCourses": [
+    {
+      "studentCourseID": "SC001",
+      "studentId": "STU001",
+      "courseScheduleId": "INSC 568 F2026",
+      "paid": true,
+      "grade": 3.86,
+      "createdAt": "2026-04-17T10:00:00Z",
+      "updatedAt": "2026-04-17T10:00:00Z"
+    }
+  ]
 }

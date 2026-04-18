@@ -1,7 +1,13 @@
 {
-  "studentId": "123456789",
-  "studentName": "Matvei Michkov",
-  "studentSSN": "123-45-6789",
-  "studentEmail": "matvei.michkov@example.com",
-  "studentPhone": "123-456-7890"
+  "students": [
+    {
+      "studentId": "STU001",
+      "studentName": "Matvei Michkov",
+      "studentSSN": "123-45-6789",
+      "studentEmail": "matvei.michkov@example.com",
+      "studentPhone": "123-456-7890",
+      "createdAt": "2026-04-17T10:00:00Z",
+      "updatedAt": "2026-04-17T10:00:00Z"
+    }
+  ]
 }

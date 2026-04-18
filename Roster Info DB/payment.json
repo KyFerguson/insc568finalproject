@@ -1,6 +1,12 @@
 {
-"paymentId": "",
-  "startingBalance": "",
-  "status": "",
-  "remainingBalance": ""
+  "payments": [
+    {
+      "paymentId": "PAY001",
+      "startingBalance": 0.00,
+      "status": "pending",
+      "remainingBalance": 0.00,
+      "createdAt": "2026-04-17T10:00:00Z",
+      "updatedAt": "2026-04-17T10:00:00Z"
+    }
+  ]
 }
