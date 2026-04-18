@@ -1,0 +1,10 @@
+course.courseID = primary KEY
+course_schedule.courseID = secondary key
+student_course.courseID = secondary key
+
+student.studentID = primary key
+student_course.studentID = secondary key
+
+faculty.facultyID = primary key
+course_schedule.facultyID = secondary key
+
