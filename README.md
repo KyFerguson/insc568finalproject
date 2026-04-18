@@ -14,3 +14,8 @@ Depends on the needs in your design/implementation, the provided 2 database sche
     Task 3. Discussions
         a. Should an ESB be adopted in this project, in the short term or in the long run?  Why or why not?
         b. The benefits of adopting BPM in this project.
+
+
+![img.png](img.png)
+
+![img_1.png](img_1.png)

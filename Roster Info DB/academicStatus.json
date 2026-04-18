@@ -1,0 +1,17 @@
+[
+  {
+    "academicStatusID": "1",
+    "remark": "",
+    "statusType": "admitted"
+  },
+  {
+    "academicStatusID": "2",
+    "statusType": "probation",
+    "remark": ""
+  },
+  {
+    "academicStatusID": "3",
+    "statusType": "enrolled",
+    "remark": ""
+  }
+]
