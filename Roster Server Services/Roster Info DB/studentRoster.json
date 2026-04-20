@@ -74,6 +74,21 @@
       "academicStatusID": "7",
       "createdAt": "2026-04-19T23:37:34.081Z",
       "updatedAt": "2026-04-19T23:37:34.081Z"
+    },
+    {
+      "stuId": "STU006",
+      "name": "Bob Smith",
+      "SSN": "",
+      "emailAddress": "bsmith=undefined",
+      "homePhone": "",
+      "localAddr": "",
+      "homeAddr": "123 Tulip Road, Ambler PA 19002",
+      "emergencyContact": "",
+      "programID": "INSC",
+      "paymentID": "",
+      "academicStatusID": "8",
+      "createdAt": "2026-04-20T01:15:30.275Z",
+      "updatedAt": "2026-04-20T01:15:30.275Z"
     }
   ]
 }

@@ -100,6 +100,71 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /api/public/students/legacy:
+    post:
+      tags:
+        - Students
+      summary: Create student application from legacy payload
+      description: >-
+        Adapter endpoint for legacy clients that submit semicolon-delimited
+        key/value application text. The adapter maps legacy fields into the
+        current CreateStudentBundle request contract and invokes the same
+        student creation flow.
+      operationId: createStudentBundleFromLegacy
+      requestBody:
+        required: true
+        content:
+          text/plain:
+            schema:
+              type: string
+              minLength: 1
+            examples:
+              legacyText:
+                value: >-
+                  Name: Bob Smith; ID: 1111; Home Address: 123 Tulip Road,
+                  Ambler PA 19002; Email: bsmith@yahoo.com; Phone:
+                  215-777-8888
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LegacyStudentAdapterJsonRequest'
+            examples:
+              legacyJson:
+                value:
+                  legacyPayload: >-
+                    Name: Bob Smith; ID: 1111; Home Address: 123 Tulip Road,
+                    Ambler PA 19002; Email: bsmith@yahoo.com; Phone:
+                    215-777-8888
+                  programID: INSC
+      responses:
+        '201':
+          description: Student records created successfully through adapter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegacyCreateStudentBundleResponse'
+        '400':
+          description: Validation or legacy payload format error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidLegacyFormat:
+                  value:
+                    error: Legacy payload format is invalid. Expected key/value pairs separated by ';'.
+        '409':
+          description: Duplicate student emailAddress
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unexpected server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /api/enrollment-info:
     get:
       tags:
@@ -205,6 +270,23 @@ paths:
 
 components:
   schemas:
+    LegacyStudentAdapterJsonRequest:
+      type: object
+      properties:
+        legacyPayload:
+          type: string
+          minLength: 1
+        application:
+          type: string
+          minLength: 1
+        payload:
+          type: string
+          minLength: 1
+        programID:
+          type: string
+          minLength: 1
+      additionalProperties: false
+
     CreateStudentBundleRequest:
       type: object
       properties:
@@ -260,6 +342,51 @@ components:
             - student
             - program
             - academicStatus
+      required:
+        - message
+        - data
+
+    LegacyCreateStudentBundleResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            application:
+              type: object
+              properties:
+                studentId:
+                  type: string
+                program:
+                  type: object
+                  properties:
+                    programId:
+                      type: string
+                    programName:
+                      type: string
+                  required:
+                    - programId
+                    - programName
+                statusType:
+                  type: string
+              required:
+                - studentId
+                - program
+                - statusType
+            adapter:
+              type: object
+              properties:
+                source:
+                  type: string
+                legacyApplicantId:
+                  type: string
+              required:
+                - source
+          required:
+            - application
+            - adapter
       required:
         - message
         - data

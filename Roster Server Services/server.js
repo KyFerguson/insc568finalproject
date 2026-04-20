@@ -188,6 +188,89 @@ function validateEnrollmentSelectionBody(body) {
   return null;
 }
 
+function normalizeLegacyFieldKey(key) {
+  return String(key || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+}
+
+function parseLegacyFieldMap(legacyText) {
+  const fieldMap = {};
+  const segments = String(legacyText || "")
+    .split(";")
+    .map((segment) => segment.trim())
+    .filter(Boolean);
+
+  for (const segment of segments) {
+    const separatorIndex = segment.indexOf(":");
+    if (separatorIndex <= 0) {
+      continue;
+    }
+
+    const rawKey = segment.slice(0, separatorIndex).trim();
+    const rawValue = segment.slice(separatorIndex + 1).trim();
+    const normalizedKey = normalizeLegacyFieldKey(rawKey);
+
+    if (normalizedKey) {
+      fieldMap[normalizedKey] = rawValue;
+    }
+  }
+
+  return fieldMap;
+}
+
+function pickLegacyFieldValue(fieldMap, candidateKeys) {
+  for (const key of candidateKeys) {
+    const value = fieldMap[normalizeLegacyFieldKey(key)];
+    if (typeof value === "string" && value.trim()) {
+      return value.trim();
+    }
+  }
+
+  return "";
+}
+
+function createStudentBundleFromLegacyPayload(legacyText, options = {}) {
+  const input = String(legacyText || "").trim();
+  if (!input) {
+    const error = new Error("Legacy payload is required.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const fieldMap = parseLegacyFieldMap(input);
+  if (Object.keys(fieldMap).length === 0) {
+    const error = new Error("Legacy payload format is invalid. Expected key/value pairs separated by ';'.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const configuredProgramID = typeof options.programID === "string" ? options.programID.trim() : "";
+  const payloadProgramID = pickLegacyFieldValue(fieldMap, ["program id", "programID", "program"]);
+  const defaultProgramID = String(process.env.LEGACY_PROGRAM_ID || "INSC").trim();
+  const programID = configuredProgramID || payloadProgramID || defaultProgramID;
+
+  const mappedBody = {
+    student: {
+      name: pickLegacyFieldValue(fieldMap, ["name"]),
+      SSN: pickLegacyFieldValue(fieldMap, ["ssn"]),
+      emailAddress: pickLegacyFieldValue(fieldMap, ["email", "email address", "emailAddress"]),
+      homePhone: pickLegacyFieldValue(fieldMap, ["phone", "home phone", "homePhone"]),
+      localAddr: pickLegacyFieldValue(fieldMap, ["local address", "localAddr"]),
+      homeAddr: pickLegacyFieldValue(fieldMap, ["home address", "homeAddr", "address"]),
+      emergencyContact: pickLegacyFieldValue(fieldMap, ["emergency contact", "emergencyContact"]),
+    },
+    programID,
+  };
+
+  return {
+    mappedBody,
+    legacyApplicantId: pickLegacyFieldValue(fieldMap, ["id", "student id", "applicant id"]),
+    sourcePayload: input,
+  };
+}
+
 function createStudentBundle(body) {
   const studentRosterFile = readJson(FILES.studentRoster);
   const academicStatusFile = readJson(FILES.academicStatuses);
@@ -315,6 +398,26 @@ function parseJsonBody(req) {
       } catch {
         reject(new Error("Invalid JSON body"));
       }
+    });
+
+    req.on("error", reject);
+  });
+}
+
+function parseTextBody(req) {
+  return new Promise((resolve, reject) => {
+    let raw = "";
+
+    req.on("data", (chunk) => {
+      raw += chunk;
+      if (raw.length > 1024 * 1024) {
+        reject(new Error("Request body too large"));
+        req.destroy();
+      }
+    });
+
+    req.on("end", () => {
+      resolve(String(raw || ""));
     });
 
     req.on("error", reject);
@@ -729,6 +832,61 @@ const server = https.createServer(httpsOptions, async (req, res) => {
     }
   }
 
+  if (req.method === "POST" && routePath === "/api/public/students/legacy") {
+    try {
+      const contentType = String(req.headers["content-type"] || "").toLowerCase();
+      let legacyPayload = "";
+      let programID = "";
+
+      if (contentType.includes("application/json")) {
+        const body = await parseJsonBody(req);
+        legacyPayload = String(body.legacyPayload || body.application || body.payload || "");
+        programID = String(body.programID || "").trim();
+      } else {
+        legacyPayload = await parseTextBody(req);
+      }
+
+      const adapted = createStudentBundleFromLegacyPayload(legacyPayload, { programID });
+      const validationError = validateBody(adapted.mappedBody);
+      if (validationError) {
+        respond(400, {
+          message: "We could not submit your legacy application. Please review the format and try again.",
+          error: validationError,
+          expectedFormat: "Name: Bob Smith; ID: 1111; Home Address: 123 Main St; Email: bob@example.com; Phone: 111-222-3333",
+        });
+        return;
+      }
+
+      const result = createStudentBundle(adapted.mappedBody);
+      respond(201, {
+        message: buildApplicationSubmissionMessage(result.program.name, result.student.stuId),
+        data: {
+          ...toPublicApplicationResponse(result),
+          adapter: {
+            source: "legacy-client",
+            legacyApplicantId: adapted.legacyApplicantId,
+          },
+        },
+      }, {
+        updatedTables: result.updatedTables,
+      });
+      return;
+    } catch (error) {
+      const statusCode = error.statusCode || 500;
+      respond(statusCode, {
+        message: "We could not process the legacy application right now.",
+        error: error.message || "Unexpected error",
+      }, {
+        updatedTables: Array.isArray(error.updatedTables) ? error.updatedTables : [],
+        error: {
+          message: error.message || "Unexpected error",
+          targetTables: Array.isArray(error.targetTables) ? error.targetTables : [],
+        },
+      });
+      return;
+    }
+  }
+
   if (req.method === "POST" && routePath === "/api/enrollments") {
     try {
       const body = await parseJsonBody(req);
@@ -771,6 +929,7 @@ const server = https.createServer(httpsOptions, async (req, res) => {
     availableRoutes: [
       "GET /health",
       "POST /api/public/students",
+      "POST /api/public/students/legacy",
       "GET /api/enrollment-info",
       "POST /api/enrollments",
     ],
