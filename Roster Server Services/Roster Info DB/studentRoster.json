@@ -1,0 +1,79 @@
+{
+  "students": [
+    {
+      "stuId": "STU001",
+      "name": "William Nylander",
+      "SSN": "",
+      "emailAddress": "williamNylander@psu.edu",
+      "homePhone": "",
+      "localAddr": "",
+      "homeAddr": "",
+      "emergencyContact": "",
+      "programID": "INSC",
+      "paymentID": "",
+      "academicStatusID": "1",
+      "createdAt": "2026-04-17T10:00:00Z",
+      "updatedAt": "2026-04-20T00:05:00Z"
+    },
+    {
+      "stuId": "STU002",
+      "name": "Janni Gourde",
+      "SSN": "123-987-5566",
+      "emailAddress": "Janni_Gourdee@psu.edu",
+      "homePhone": "999-456-3344",
+      "localAddr": "1800 Arch St, Philadelphia, PA, 19145",
+      "homeAddr": "2020 Walnut, Philadelphia, PA, 19145",
+      "emergencyContact": "Mom 222-292-4453",
+      "programID": "ARTS",
+      "paymentID": "",
+      "academicStatusID": "1",
+      "createdAt": "2026-04-19T23:18:19.232Z",
+      "updatedAt": "2026-04-19T23:18:19.232Z"
+    },
+    {
+      "stuId": "STU003",
+      "name": "Josh Anderson",
+      "SSN": "123-987-4321",
+      "emailAddress": "Josh_Anderson@psu.edu",
+      "homePhone": "999-456-1111",
+      "localAddr": "1277 Arch St, Philadelphia, PA, 19145",
+      "homeAddr": "123 Main, Philadelphia, PA, 19145",
+      "emergencyContact": "Mom 111-292-4453",
+      "programID": "ARTS",
+      "paymentID": "",
+      "academicStatusID": "5",
+      "createdAt": "2026-04-19T23:32:08.528Z",
+      "updatedAt": "2026-04-19T23:32:08.528Z"
+    },
+    {
+      "stuId": "STU004",
+      "name": "Nikita Kucherov",
+      "SSN": "888-987-4321",
+      "emailAddress": "nikita_kuch@psu.edu",
+      "homePhone": "999-456-8888",
+      "localAddr": "8888 Arch St, Tampa Bay, FL, 19145",
+      "homeAddr": "123 Main, Philadelphia, PA, 19145",
+      "emergencyContact": "Mom 881-292-4453",
+      "programID": "ECON",
+      "paymentID": "",
+      "academicStatusID": "6",
+      "createdAt": "2026-04-19T23:35:40.794Z",
+      "updatedAt": "2026-04-19T23:35:40.794Z"
+    },
+    {
+      "stuId": "STU005",
+      "name": "Cole Caulfield",
+      "SSN": "888-987-1111",
+      "emailAddress": "colec@psu.edu",
+      "homePhone": "999-456-8888",
+      "localAddr": "8888 Arch St, Tampa Bay, FL, 19145",
+      "homeAddr": "123 Main, Philadelphia, PA, 19145",
+      "emergencyContact": "Mom 881-292-4453",
+      "programID": "ECON",
+      "paymentID": "",
+      "academicStatusID": "7",
+      "createdAt": "2026-04-19T23:37:34.081Z",
+      "updatedAt": "2026-04-19T23:37:34.081Z"
+    }
+  ]
+}

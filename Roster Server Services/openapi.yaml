@@ -1,0 +1,548 @@
+openapi: 3.1.1
+info:
+  title: Roster Server Services API
+  version: 1.0.0
+  description: >-
+    API for creating an initial student application record.
+
+servers:
+  - url: https://localhost:3000
+    description: Local HTTPS server
+
+tags:
+  - name: Health
+  - name: Students
+  - name: Enrollment
+
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Health check
+      operationId: getHealth
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    const: ok
+                required:
+                  - status
+              example:
+                status: ok
+
+  /api/public/students:
+    post:
+      tags:
+        - Students
+      summary: Create initial student application
+      description: >-
+        Creates a student roster record from applicant-submitted student profile
+        data and selected program ID. Program metadata and academic status are
+        backend-managed defaults; fee, payment, and enrollment are not accepted
+        in this request.
+      operationId: createStudentBundle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateStudentBundleRequest'
+            examples:
+              default:
+                value:
+                  student:
+                    name: Jane Doe
+                    SSN: ''
+                    emailAddress: jane.doe@psu.edu
+                    homePhone: ''
+                    localAddr: ''
+                    homeAddr: ''
+                    emergencyContact: ''
+                  programID: INSC
+      responses:
+        '201':
+          description: Student records created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateStudentBundleResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                badRequest:
+                  value:
+                    error: 'Unsupported top-level fields: enrollment'
+        '409':
+          description: Duplicate student emailAddress
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                duplicateEmail:
+                  value:
+                    error: A student with this emailAddress already exists
+        '500':
+          description: Unexpected server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/enrollment-info:
+    get:
+      tags:
+        - Enrollment
+      summary: Get enrollment info for a student
+      description: >-
+        Returns acceptance status, program details, and available courses for
+        enrollment based on the student's program. Caller can provide either
+        studentId or emailAddress query parameter.
+      operationId: getEnrollmentInfo
+      parameters:
+        - name: studentId
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Student ID value such as STU001.
+        - name: emailAddress
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Student email address used at login.
+      responses:
+        '200':
+          description: Enrollment info returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetEnrollmentInfoResponse'
+        '400':
+          description: Missing query parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Student not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unexpected server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/enrollments:
+    post:
+      tags:
+        - Enrollment
+      summary: Submit enrollment selections
+      description: >-
+        Accepts a student ID and one or more course schedule IDs, then creates
+        enrollment records. This endpoint is designed for frontend form submit
+        workflows with a minimal request body.
+      operationId: createEnrollments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEnrollmentSelectionRequest'
+            examples:
+              singleCourse:
+                value:
+                  studentId: STU001
+                  courseScheduleIds:
+                    - INSC 568 F2026
+      responses:
+        '201':
+          description: Enrollment selections submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateEnrollmentSelectionResponse'
+        '400':
+          description: Validation error or student not eligible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Student not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Duplicate enrollment conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unexpected server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    CreateStudentBundleRequest:
+      type: object
+      properties:
+        student:
+          $ref: '#/components/schemas/StudentInput'
+        programID:
+          type: string
+          minLength: 1
+      required:
+        - student
+        - programID
+      additionalProperties: false
+
+    StudentInput:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        SSN:
+          type: string
+        emailAddress:
+          type: string
+          minLength: 1
+        homePhone:
+          type: string
+        localAddr:
+          type: string
+        homeAddr:
+          type: string
+        emergencyContact:
+          type: string
+      required:
+        - name
+        - emailAddress
+      additionalProperties: false
+
+    CreateStudentBundleResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            student:
+              $ref: '#/components/schemas/StudentRecord'
+            program:
+              $ref: '#/components/schemas/ProgramRecord'
+            academicStatus:
+              $ref: '#/components/schemas/AcademicStatusRecord'
+          required:
+            - student
+            - program
+            - academicStatus
+      required:
+        - message
+        - data
+
+    StudentRecord:
+      type: object
+      properties:
+        stuId:
+          type: string
+        name:
+          type: string
+        SSN:
+          type: string
+        emailAddress:
+          type: string
+        homePhone:
+          type: string
+        localAddr:
+          type: string
+        homeAddr:
+          type: string
+        emergencyContact:
+          type: string
+        programID:
+          type: string
+        paymentID:
+          type: string
+        academicStatusID:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - stuId
+        - name
+        - emailAddress
+        - programID
+        - paymentID
+        - academicStatusID
+        - createdAt
+        - updatedAt
+
+    ProgramRecord:
+      type: object
+      properties:
+        programID:
+          type: string
+        name:
+          type: string
+        department:
+          type: string
+        college:
+          type: string
+      required:
+        - programID
+
+    AcademicStatusRecord:
+      type: object
+      properties:
+        academicStatusID:
+          type: string
+        statusType:
+          type: string
+        remark:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - academicStatusID
+        - statusType
+        - createdAt
+        - updatedAt
+
+    FeeRecord:
+      type: object
+      properties:
+        feeId:
+          type: string
+        feePerCredit:
+          type: number
+        specialRate:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - feeId
+        - createdAt
+        - updatedAt
+
+    PaymentRecord:
+      type: object
+      properties:
+        paymentId:
+          type: string
+        startingBalance:
+          type: number
+        status:
+          type: string
+        remainingBalance:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - paymentId
+        - createdAt
+        - updatedAt
+
+    EnrollmentRecord:
+      type: object
+      properties:
+        enrollmentId:
+          type: string
+        studentId:
+          type: string
+        courseScheduleId:
+          type: string
+        credit:
+          type: number
+        feeID:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - enrollmentId
+        - studentId
+        - courseScheduleId
+        - credit
+        - feeID
+        - createdAt
+        - updatedAt
+
+    EnrollmentCourse:
+      type: object
+      properties:
+        courseScheduleID:
+          type: string
+        courseID:
+          type: string
+        courseName:
+          type: string
+        sectionNo:
+          type: integer
+        semester:
+          type: string
+        scheduleTime:
+          type: string
+        location:
+          type: string
+        credits:
+          type: integer
+        prerequisite:
+          type: string
+        availability:
+          type: boolean
+      required:
+        - courseScheduleID
+        - courseID
+        - courseName
+
+    EnrollmentInfo:
+      type: object
+      properties:
+        student:
+          type: object
+          properties:
+            studentId:
+              type: string
+            name:
+              type: string
+            emailAddress:
+              type: string
+          required:
+            - studentId
+            - name
+            - emailAddress
+        acceptanceRecord:
+          type: object
+          properties:
+            statusType:
+              type: string
+            canRegister:
+              type: boolean
+          required:
+            - statusType
+            - canRegister
+        program:
+          allOf:
+            - $ref: '#/components/schemas/ProgramRecord'
+          nullable: true
+        availableCourses:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnrollmentCourse'
+      required:
+        - student
+        - acceptanceRecord
+        - availableCourses
+
+    GetEnrollmentInfoResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/EnrollmentInfo'
+      required:
+        - message
+        - data
+
+    CreateEnrollmentSelectionRequest:
+      type: object
+      properties:
+        studentId:
+          type: string
+          minLength: 1
+        courseScheduleIds:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            minLength: 1
+        feeID:
+          type: string
+      required:
+        - studentId
+        - courseScheduleIds
+      additionalProperties: false
+
+    EnrollmentSubmissionSummary:
+      type: object
+      properties:
+        student:
+          type: object
+          properties:
+            studentId:
+              type: string
+            name:
+              type: string
+          required:
+            - studentId
+            - name
+        enrollments:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnrollmentRecord'
+      required:
+        - student
+        - enrollments
+
+    CreateEnrollmentSelectionResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/EnrollmentSubmissionSummary'
+      required:
+        - message
+        - data
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error

@@ -1,0 +1,28 @@
+{
+  "programs": [
+    {
+      "programID": "INSC",
+      "name": "Information Systems",
+      "department": "Engineering",
+      "college": "Engineering",
+      "createdAt": "2026-04-17T10:00:00Z",
+      "updatedAt": "2026-04-17T10:00:00Z"
+    },
+        {
+      "programID": "ARTS",
+      "name": "Art History",
+      "department": "Arts",
+      "college": "Arts",
+      "createdAt": "2026-04-17T10:00:00Z",
+      "updatedAt": "2026-04-17T10:00:00Z"
+    },
+            {
+      "programID": "ECON",
+      "name": "Economics",
+      "department": "Economics",
+      "college": "Mathematics",
+      "createdAt": "2026-04-17T10:00:00Z",
+      "updatedAt": "2026-04-17T10:00:00Z"
+    }
+  ]
+}

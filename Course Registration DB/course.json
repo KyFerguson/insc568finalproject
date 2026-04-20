@@ -4,7 +4,99 @@
       "courseID": "INSC 568",
       "courseName": "Software Engineering",
       "sectionNo": 1,
+      "credits": 3,
+      "programID": "INSC",
       "prerequisite": "CSCI 101",
+      "createdAt": "2026-04-17T10:00:00Z",
+      "updatedAt": "2026-04-17T10:00:00Z"
+    },
+    {
+      "courseID": "INSC 570",
+      "courseName": "Data Management",
+      "sectionNo": 1,
+      "credits": 3,
+      "programID": "INSC",
+      "prerequisite": "INSC 568",
+      "createdAt": "2026-04-17T10:00:00Z",
+      "updatedAt": "2026-04-17T10:00:00Z"
+    },
+    {
+      "courseID": "INSC 575",
+      "courseName": "Information Security",
+      "sectionNo": 1,
+      "credits": 3,
+      "programID": "INSC",
+      "prerequisite": "INSC 570",
+      "createdAt": "2026-04-17T10:00:00Z",
+      "updatedAt": "2026-04-17T10:00:00Z"
+    },
+    {
+      "courseID": "INSC 580",
+      "courseName": "Cloud Systems Architecture",
+      "sectionNo": 1,
+      "credits": 3,
+      "programID": "INSC",
+      "prerequisite": "INSC 570",
+      "createdAt": "2026-04-17T10:00:00Z",
+      "updatedAt": "2026-04-17T10:00:00Z"
+    },
+    {
+      "courseID": "ARTS 210",
+      "courseName": "Modern Art Survey",
+      "sectionNo": 1,
+      "credits": 3,
+      "programID": "ARTS",
+      "prerequisite": "",
+      "createdAt": "2026-04-17T10:00:00Z",
+      "updatedAt": "2026-04-17T10:00:00Z"
+    },
+    {
+      "courseID": "ARTS 315",
+      "courseName": "Museum Studies",
+      "sectionNo": 1,
+      "credits": 3,
+      "programID": "ARTS",
+      "prerequisite": "ARTS 210",
+      "createdAt": "2026-04-17T10:00:00Z",
+      "updatedAt": "2026-04-17T10:00:00Z"
+    },
+    {
+      "courseID": "ARTS 420",
+      "courseName": "Curatorial Practice",
+      "sectionNo": 1,
+      "credits": 3,
+      "programID": "ARTS",
+      "prerequisite": "ARTS 315",
+      "createdAt": "2026-04-17T10:00:00Z",
+      "updatedAt": "2026-04-17T10:00:00Z"
+    },
+    {
+      "courseID": "ECON 201",
+      "courseName": "Macroeconomic Theory",
+      "sectionNo": 1,
+      "credits": 3,
+      "programID": "ECON",
+      "prerequisite": "",
+      "createdAt": "2026-04-17T10:00:00Z",
+      "updatedAt": "2026-04-17T10:00:00Z"
+    },
+    {
+      "courseID": "ECON 330",
+      "courseName": "Econometrics",
+      "sectionNo": 1,
+      "credits": 3,
+      "programID": "ECON",
+      "prerequisite": "ECON 201",
+      "createdAt": "2026-04-17T10:00:00Z",
+      "updatedAt": "2026-04-17T10:00:00Z"
+    },
+    {
+      "courseID": "ECON 410",
+      "courseName": "International Trade",
+      "sectionNo": 1,
+      "credits": 3,
+      "programID": "ECON",
+      "prerequisite": "ECON 330",
       "createdAt": "2026-04-17T10:00:00Z",
       "updatedAt": "2026-04-17T10:00:00Z"
     }

@@ -1,0 +1,53 @@
+{
+  "academicStatuses": [
+    {
+      "academicStatusID": "1",
+      "statusType": "admitted",
+      "remark": "",
+      "createdAt": "2026-04-17T10:00:00Z",
+      "updatedAt": "2026-04-17T10:00:00Z"
+    },
+    {
+      "academicStatusID": "2",
+      "statusType": "probation",
+      "remark": "",
+      "createdAt": "2026-04-17T10:00:00Z",
+      "updatedAt": "2026-04-17T10:00:00Z"
+    },
+    {
+      "academicStatusID": "3",
+      "statusType": "enrolled",
+      "remark": "",
+      "createdAt": "2026-04-17T10:00:00Z",
+      "updatedAt": "2026-04-17T10:00:00Z"
+    },
+    {
+      "academicStatusID": "4",
+      "statusType": "applicant",
+      "remark": "Created from initial application submission",
+      "createdAt": "2026-04-19T23:18:19.232Z",
+      "updatedAt": "2026-04-19T23:18:19.232Z"
+    },
+    {
+      "academicStatusID": "5",
+      "statusType": "applicant",
+      "remark": "Created from initial application submission",
+      "createdAt": "2026-04-19T23:32:08.528Z",
+      "updatedAt": "2026-04-19T23:32:08.528Z"
+    },
+    {
+      "academicStatusID": "6",
+      "statusType": "applicant",
+      "remark": "Created from initial application submission",
+      "createdAt": "2026-04-19T23:35:40.794Z",
+      "updatedAt": "2026-04-19T23:35:40.794Z"
+    },
+    {
+      "academicStatusID": "7",
+      "statusType": "applicant",
+      "remark": "Created from initial application submission",
+      "createdAt": "2026-04-19T23:37:34.081Z",
+      "updatedAt": "2026-04-19T23:37:34.081Z"
+    }
+  ]
+}

@@ -2,8 +2,8 @@
   "fees": [
     {
       "feeId": "FEE001",
-      "feePerCredit": 500.00,
-      "specialRate": 0.00,
+      "feePerCredit": 500,
+      "specialRate": 0,
       "createdAt": "2026-04-17T10:00:00Z",
       "updatedAt": "2026-04-17T10:00:00Z"
     }

@@ -1,0 +1,22 @@
+{
+  "enrollments": [
+    {
+      "enrollmentId": "ENR001",
+      "studentId": "STU001",
+      "courseScheduleId": "INSC 580 F2026",
+      "credit": 3,
+      "feeID": "FEE001",
+      "createdAt": "2026-04-20T00:13:32.397Z",
+      "updatedAt": "2026-04-20T00:13:32.397Z"
+    },
+    {
+      "enrollmentId": "ENR002",
+      "studentId": "STU001",
+      "courseScheduleId": "INSC 575 F2026",
+      "credit": 3,
+      "feeID": "FEE001",
+      "createdAt": "2026-04-20T00:13:32.397Z",
+      "updatedAt": "2026-04-20T00:13:32.397Z"
+    }
+  ]
+}

@@ -2,9 +2,9 @@
   "payments": [
     {
       "paymentId": "PAY001",
-      "startingBalance": 0.00,
+      "startingBalance": 0,
       "status": "pending",
-      "remainingBalance": 0.00,
+      "remainingBalance": 0,
       "createdAt": "2026-04-17T10:00:00Z",
       "updatedAt": "2026-04-17T10:00:00Z"
     }
