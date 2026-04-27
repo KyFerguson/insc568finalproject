@@ -55,6 +55,13 @@
       "remark": "Created from initial application submission",
       "createdAt": "2026-04-20T01:15:30.275Z",
       "updatedAt": "2026-04-20T01:15:30.275Z"
+    },
+    {
+      "academicStatusID": "9",
+      "statusType": "admitted",
+      "remark": "Admitted by advisor",
+      "createdAt": "2026-04-26T19:13:19.629Z",
+      "updatedAt": "2026-04-26T19:36:57.623Z"
     }
   ]
 }

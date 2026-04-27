@@ -2,8 +2,12 @@ const https = require("https");
 const fs = require("fs");
 const path = require("path");
 const { randomUUID } = require("crypto");
+const notificationQueue = require("./notificationQueue");
+const mockEmailServer = require("./mockEmailServer");
 
 const PORT = process.env.PORT || 3000;
+const ADVISOR_EMAIL = process.env.ADVISOR_EMAIL || "advisor@lionuniversity.edu";
+const NOREPLY_EMAIL = "noreply@lionuniversity.edu";
 const DB_DIR = path.join(__dirname, "Roster Info DB");
 const LOG_DIR = path.join(__dirname, "logs");
 const API_LOG_PATH = path.join(LOG_DIR, "api.log");
@@ -179,10 +183,6 @@ function validateEnrollmentSelectionBody(body) {
   const invalidItem = body.courseScheduleIds.find((item) => typeof item !== "string" || !item.trim());
   if (invalidItem !== undefined) {
     return "courseScheduleIds must contain non-empty string values";
-  }
-
-  if (body.feeID !== undefined && typeof body.feeID !== "string") {
-    return "feeID must be a string when provided";
   }
 
   return null;
@@ -456,11 +456,21 @@ function getEnrollmentInfo(filters) {
   const emailAddress = normalizeText(filters.emailAddress).toLowerCase();
 
   let student = null;
-  if (studentId) {
-    student = students.find((item) => normalizeText(item.stuId) === studentId) || null;
-  }
 
-  if (!student && emailAddress) {
+  if (studentId && emailAddress) {
+    const byId = students.find((item) => normalizeText(item.stuId) === studentId) || null;
+    const byEmail = students.find((item) => normalizeText(item.emailAddress).toLowerCase() === emailAddress) || null;
+
+    if (!byId || !byEmail || normalizeText(byId.stuId) !== normalizeText(byEmail.stuId)) {
+      const error = new Error("The provided studentId and emailAddress do not match the same student record.");
+      error.statusCode = 401;
+      throw error;
+    }
+
+    student = byId;
+  } else if (studentId) {
+    student = students.find((item) => normalizeText(item.stuId) === studentId) || null;
+  } else if (emailAddress) {
     student = students.find((item) => normalizeText(item.emailAddress).toLowerCase() === emailAddress) || null;
   }
 
@@ -504,6 +514,7 @@ function getEnrollmentInfo(filters) {
         courseScheduleID: schedule.courseScheduleID,
         courseID: schedule.courseID,
         courseName: course.courseName,
+        courseDescriptionUrl: `https://www.lionuniversity.com/course/${encodeURIComponent(schedule.courseID)}`,
         sectionNo: course.sectionNo,
         semester: schedule.semester,
         scheduleTime: schedule.scheduleTime,
@@ -511,6 +522,7 @@ function getEnrollmentInfo(filters) {
         credits: course.credits,
         prerequisite: course.prerequisite,
         availability: schedule.availability,
+        requiresAdvisorApproval: schedule.requiresAdvisorApproval === true,
       };
     });
 
@@ -652,6 +664,7 @@ function createEnrollmentSelections(body) {
       courseScheduleId: schedule.courseScheduleID,
       credit: Number(course.credits || 0),
       feeID,
+      status: schedule.requiresAdvisorApproval === true ? "Pending Advisor" : "Requested",
       createdAt: timestamp,
       updatedAt: timestamp,
     };
@@ -699,6 +712,148 @@ function createEnrollmentSelections(body) {
       name: student.name,
     },
     enrollments: createdEnrollments,
+    updatedTables: written.map(toTableName),
+  };
+}
+
+function admitStudent(body) {
+  const studentRosterFile = readJson(FILES.studentRoster);
+  const academicStatusFile = readJson(FILES.academicStatuses);
+
+  const students = Array.isArray(studentRosterFile.students) ? studentRosterFile.students : [];
+  const academicStatuses = Array.isArray(academicStatusFile.academicStatuses) ? academicStatusFile.academicStatuses : [];
+
+  const studentId = normalizeText(body.studentId);
+  const student = students.find((item) => normalizeText(item.stuId) === studentId);
+  if (!student) {
+    const error = new Error("Student not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const academicStatus = academicStatuses.find(
+    (item) => normalizeText(item.academicStatusID) === normalizeText(student.academicStatusID)
+  );
+  if (!academicStatus) {
+    const error = new Error("Academic status record not found for student");
+    error.statusCode = 500;
+    throw error;
+  }
+
+  if (normalizeText(academicStatus.statusType).toLowerCase() !== "applicant") {
+    const error = new Error(`Student status is '${academicStatus.statusType}', must be 'applicant' to admit`);
+    error.statusCode = 409;
+    throw error;
+  }
+
+  const timestamp = nowIso();
+  academicStatus.statusType = "admitted";
+  academicStatus.remark = "Admitted by advisor";
+  academicStatus.updatedAt = timestamp;
+  student.updatedAt = timestamp;
+
+  academicStatusFile.academicStatuses = academicStatuses;
+  studentRosterFile.students = students;
+
+  const originalText = {
+    [FILES.academicStatuses]: fs.readFileSync(FILES.academicStatuses, "utf8"),
+    [FILES.studentRoster]: fs.readFileSync(FILES.studentRoster, "utf8"),
+  };
+
+  const written = [];
+  const targetTables = [toTableName(FILES.academicStatuses), toTableName(FILES.studentRoster)];
+  try {
+    writeJson(FILES.academicStatuses, academicStatusFile);
+    written.push(FILES.academicStatuses);
+    writeJson(FILES.studentRoster, studentRosterFile);
+    written.push(FILES.studentRoster);
+  } catch (error) {
+    for (const filePath of written) {
+      fs.writeFileSync(filePath, originalText[filePath], "utf8");
+    }
+    error.updatedTables = written.map(toTableName);
+    error.targetTables = targetTables;
+    throw error;
+  }
+
+  return {
+    student: {
+      studentId: student.stuId,
+      name: student.name,
+    },
+    academicStatus: {
+      academicStatusID: academicStatus.academicStatusID,
+      statusType: academicStatus.statusType,
+      remark: academicStatus.remark,
+      updatedAt: academicStatus.updatedAt,
+    },
+    updatedTables: written.map(toTableName),
+  };
+}
+
+const APPROVE_COURSE_DECISIONS = {
+  approve: "Registered",
+  pending_instructor: "Pending Instructor",
+};
+
+function approveCourseEnrollment(body) {
+  const enrollmentFile = readJson(FILES.enrollments);
+  const enrollments = Array.isArray(enrollmentFile.enrollments) ? enrollmentFile.enrollments : [];
+
+  const enrollmentId = normalizeText(body.enrollmentId);
+  const enrollment = enrollments.find((item) => normalizeText(item.enrollmentId) === enrollmentId);
+  if (!enrollment) {
+    const error = new Error("Enrollment not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  if (normalizeText(enrollment.status) !== "Pending Advisor") {
+    const error = new Error(`Enrollment status is '${enrollment.status}', must be 'Pending Advisor' to approve`);
+    error.statusCode = 409;
+    throw error;
+  }
+
+  const decision = normalizeText(body.decision).toLowerCase();
+  const newStatus = APPROVE_COURSE_DECISIONS[decision];
+  if (!newStatus) {
+    const error = new Error(`Invalid decision '${body.decision}'. Must be 'approve' or 'pending_instructor'`);
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const timestamp = nowIso();
+  enrollment.status = newStatus;
+  enrollment.updatedAt = timestamp;
+
+  enrollmentFile.enrollments = enrollments;
+
+  const originalText = {
+    [FILES.enrollments]: fs.readFileSync(FILES.enrollments, "utf8"),
+  };
+
+  const written = [];
+  const targetTables = [toTableName(FILES.enrollments)];
+  try {
+    writeJson(FILES.enrollments, enrollmentFile);
+    written.push(FILES.enrollments);
+  } catch (error) {
+    for (const filePath of written) {
+      fs.writeFileSync(filePath, originalText[filePath], "utf8");
+    }
+    error.updatedTables = written.map(toTableName);
+    error.targetTables = targetTables;
+    throw error;
+  }
+
+  return {
+    enrollment: {
+      enrollmentId: enrollment.enrollmentId,
+      studentId: enrollment.studentId,
+      courseScheduleId: enrollment.courseScheduleId,
+      status: enrollment.status,
+      updatedAt: enrollment.updatedAt,
+    },
     updatedTables: written.map(toTableName),
   };
 }
@@ -900,11 +1055,37 @@ const server = https.createServer(httpsOptions, async (req, res) => {
       }
 
       const result = createEnrollmentSelections(body);
+
+      const pendingAdvisor = result.enrollments.filter((e) => e.status === "Pending Advisor");
+      for (const enrollment of pendingAdvisor) {
+        notificationQueue.enqueue({
+          to: ADVISOR_EMAIL,
+          from: NOREPLY_EMAIL,
+          subject: `Action Required: Course Enrollment Approval – ${result.student.name}`,
+          body: [
+            `Student ${result.student.name} (${enrollment.studentId}) has submitted an enrollment`,
+            `request for course schedule ${enrollment.courseScheduleId}, which requires advisor approval.`,
+            ``,
+            `Enrollment ID : ${enrollment.enrollmentId}`,
+            `Credits       : ${enrollment.credit}`,
+            `Status        : ${enrollment.status}`,
+            ``,
+            `Please log in and review the enrollment to approve or return it for instructor review.`,
+          ].join("\n"),
+          metadata: {
+            enrollmentId: enrollment.enrollmentId,
+            studentId: enrollment.studentId,
+            courseScheduleId: enrollment.courseScheduleId,
+          },
+        });
+      }
+
+      const { updatedTables: enrollmentTables, ...enrollmentData } = result;
       respond(201, {
         message: "Enrollment selections submitted successfully.",
-        data: result,
+        data: enrollmentData,
       }, {
-        updatedTables: result.updatedTables,
+        updatedTables: enrollmentTables,
       });
       return;
     } catch (error) {
@@ -923,6 +1104,108 @@ const server = https.createServer(httpsOptions, async (req, res) => {
     }
   }
 
+  if (req.method === "POST" && routePath === "/api/students/admit") {
+    try {
+      const body = await parseJsonBody(req);
+      if (!normalizeText(body.studentId)) {
+        respond(400, {
+          message: "studentId is required.",
+          error: "Missing required field: studentId",
+        });
+        return;
+      }
+
+      const result = admitStudent(body);
+      const { updatedTables: admitTables, ...admitData } = result;
+      respond(200, {
+        message: `Student ${result.student.name} has been admitted successfully.`,
+        data: admitData,
+      }, {
+        updatedTables: admitTables,
+      });
+      return;
+    } catch (error) {
+      const statusCode = error.statusCode || 500;
+      respond(statusCode, {
+        message: "We could not admit the student right now.",
+        error: error.message || "Unexpected error",
+      }, {
+        updatedTables: Array.isArray(error.updatedTables) ? error.updatedTables : [],
+        error: {
+          message: error.message || "Unexpected error",
+          targetTables: Array.isArray(error.targetTables) ? error.targetTables : [],
+        },
+      });
+      return;
+    }
+  }
+
+  if (req.method === "POST" && routePath === "/api/enrollments/approve-course") {
+    try {
+      const body = await parseJsonBody(req);
+      if (!normalizeText(body.enrollmentId)) {
+        respond(400, {
+          message: "enrollmentId is required.",
+          error: "Missing required field: enrollmentId",
+        });
+        return;
+      }
+      if (!normalizeText(body.decision)) {
+        respond(400, {
+          message: "decision is required. Must be 'approve' or 'pending_instructor'.",
+          error: "Missing required field: decision",
+        });
+        return;
+      }
+
+      const result = approveCourseEnrollment(body);
+      const { updatedTables: approveTables, ...approveData } = result;
+      respond(200, {
+        message: `Enrollment ${result.enrollment.enrollmentId} updated to '${result.enrollment.status}'.`,
+        data: approveData,
+      }, {
+        updatedTables: approveTables,
+      });
+      return;
+    } catch (error) {
+      const statusCode = error.statusCode || 500;
+      respond(statusCode, {
+        message: "We could not process the course approval right now.",
+        error: error.message || "Unexpected error",
+      }, {
+        updatedTables: Array.isArray(error.updatedTables) ? error.updatedTables : [],
+        error: {
+          message: error.message || "Unexpected error",
+          targetTables: Array.isArray(error.targetTables) ? error.targetTables : [],
+        },
+      });
+      return;
+    }
+  }
+
+  if (req.method === "GET" && routePath === "/api/notifications/queue") {
+    respond(200, {
+      message: "Notification queue retrieved.",
+      data: notificationQueue.getQueue(),
+    });
+    return;
+  }
+
+  if (req.method === "GET" && routePath === "/api/notifications/mailbox") {
+    const MAILBOX_FILE = path.join(__dirname, "Notification Queue", "mailbox.json");
+    let mailboxData = { emails: [] };
+    if (fs.existsSync(MAILBOX_FILE)) {
+      try {
+        mailboxData = JSON.parse(fs.readFileSync(MAILBOX_FILE, "utf8"));
+      } catch { /* file unreadable — return empty */ }
+    }
+    respond(200, {
+      message: "Advisor mailbox retrieved.",
+      data: mailboxData,
+    });
+    return;
+  }
+
   respond(404, {
     message: "The requested endpoint was not found.",
     error: "Route not found",
@@ -932,6 +1215,10 @@ const server = https.createServer(httpsOptions, async (req, res) => {
       "POST /api/public/students/legacy",
       "GET /api/enrollment-info",
       "POST /api/enrollments",
+      "POST /api/students/admit",
+      "POST /api/enrollments/approve-course",
+      "GET /api/notifications/queue",
+      "GET /api/notifications/mailbox",
     ],
   });
 });
@@ -939,4 +1226,6 @@ const server = https.createServer(httpsOptions, async (req, res) => {
 server.listen(PORT, () => {
   // eslint-disable-next-line no-console
   console.log(`Roster API server listening on https://localhost:${PORT}`);
+  mockEmailServer.start();
+  notificationQueue.startWorker();
 });

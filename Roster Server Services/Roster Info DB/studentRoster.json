@@ -89,6 +89,21 @@
       "academicStatusID": "8",
       "createdAt": "2026-04-20T01:15:30.275Z",
       "updatedAt": "2026-04-20T01:15:30.275Z"
+    },
+    {
+      "stuId": "STU007",
+      "name": "Alex Lyon",
+      "SSN": "431-987-5566",
+      "emailAddress": "Alex_Lyon@psu.edu",
+      "homePhone": "999-654-2233",
+      "localAddr": "8888 Arch St, Tampa Bay, FL, 19145",
+      "homeAddr": "123 Main, Philadelphia, PA, 19145",
+      "emergencyContact": "Mom 881-292-4453",
+      "programID": "ARTS",
+      "paymentID": "",
+      "academicStatusID": "9",
+      "createdAt": "2026-04-26T19:13:19.629Z",
+      "updatedAt": "2026-04-26T19:36:57.623Z"
     }
   ]
 }

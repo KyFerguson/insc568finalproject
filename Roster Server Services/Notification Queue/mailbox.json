@@ -1,0 +1,17 @@
+{
+  "emails": [
+    {
+      "emailId": "EMAIL-1777253559009-fcb2cb",
+      "receivedAt": "2026-04-27T01:32:39.009Z",
+      "to": "advisor@lionuniversity.edu",
+      "from": "noreply@lionuniversity.edu",
+      "subject": "Action Required: Course Enrollment Approval – Alex Lyon",
+      "body": "Student Alex Lyon (STU007) has submitted an enrollment\nrequest for course schedule ARTS 420 F2026, which requires advisor approval.\n\nEnrollment ID : ENR003\nCredits       : 3\nStatus        : Pending Advisor\n\nPlease log in and review the enrollment to approve or return it for instructor review.",
+      "metadata": {
+        "enrollmentId": "ENR003",
+        "studentId": "STU007",
+        "courseScheduleId": "ARTS 420 F2026"
+      }
+    }
+  ]
+}

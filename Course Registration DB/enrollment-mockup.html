@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Course Registration — Lion University</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f4f5f7;
+      color: #1a1a2e;
+      min-height: 100vh;
+    }
+
+    /* ── Top nav ── */
+    .topbar {
+      background: #1e407c;
+      color: #fff;
+      padding: 0 32px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .lion-mark {
+      font-size: 28px;
+      line-height: 1;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,.25));
+    }
+    .brand-text { display: flex; flex-direction: column; gap: 1px; }
+    .brand-name {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+    .brand-portal {
+      font-size: 10px;
+      font-weight: 500;
+      color: #96bee6;
+      letter-spacing: .4px;
+      text-transform: uppercase;
+    }
+    .topbar-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+    }
+    .avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: #4a90d9;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 13px;
+    }
+
+    /* ── Page layout ── */
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 24px 20px 40px;
+    }
+
+    /* ── Page header ── */
+    .page-header {
+      margin-bottom: 28px;
+    }
+    .page-header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1e407c;
+      margin-bottom: 4px;
+    }
+    .page-header p {
+      font-size: 14px;
+      color: #5a6476;
+    }
+
+    /* ── Student status banner ── */
+    .status-banner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #eaf4ec;
+      border: 1px solid #b2dab8;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-bottom: 28px;
+      font-size: 14px;
+    }
+    .status-banner .icon { font-size: 20px; }
+    .status-banner strong { color: #1f7a35; }
+    .status-label {
+      margin-left: auto;
+      background: #1f7a35;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      padding: 3px 9px;
+      border-radius: 12px;
+    }
+
+    /* ── Section header ── */
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: #8892a4;
+      margin-bottom: 12px;
+    }
+
+    /* ── Course cards ── */
+    .course-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .course-card {
+      background: #fff;
+      border: 1.5px solid #e2e6ed;
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: grid;
+      grid-template-columns: 24px 1fr auto;
+      gap: 0 12px;
+      align-items: start;
+      cursor: pointer;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .course-card:hover {
+      border-color: #4a90d9;
+      box-shadow: 0 2px 8px rgba(30,64,124,.08);
+    }
+    .course-card.selected {
+      border-color: #1e407c;
+      background: #f5f8ff;
+    }
+    .course-card.unavailable {
+      opacity: .55;
+      cursor: not-allowed;
+      background: #fafafa;
+    }
+
+    .course-checkbox {
+      margin-top: 3px;
+      width: 18px; height: 18px;
+      accent-color: #1e407c;
+      cursor: pointer;
+    }
+
+    .course-main { min-width: 0; }
+
+    .course-id-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 3px;
+      flex-wrap: wrap;
+    }
+    .course-id {
+      font-size: 12px;
+      font-weight: 700;
+      color: #5a6476;
+      font-family: "SF Mono", "Fira Code", monospace;
+      letter-spacing: .3px;
+    }
+    .course-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1a1a2e;
+      margin-bottom: 6px;
+    }
+
+    .course-meta {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-size: 13px;
+      color: #5a6476;
+      margin-bottom: 10px;
+    }
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .meta-icon { font-size: 13px; }
+
+    /* Advisor approval callout */
+    .advisor-note {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      background: #fff8ec;
+      border: 1px solid #f5d78e;
+      border-radius: 6px;
+      padding: 9px 12px;
+      font-size: 12.5px;
+      color: #7a5a00;
+      line-height: 1.45;
+    }
+    .advisor-note .icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+    /* Standard (no approval needed) note */
+    .open-note {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12.5px;
+      color: #3a7d44;
+    }
+    .open-note .icon { font-size: 13px; }
+
+    /* Seats badge */
+    .seats-badge {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 20px;
+      white-space: nowrap;
+      align-self: start;
+    }
+    .seats-ok { background: #eaf4ec; color: #1f7a35; }
+    .seats-low { background: #fff3e0; color: #c25e00; }
+    .seats-full { background: #fdecea; color: #b71c1c; }
+
+    /* Credits chip */
+    .credits-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      background: #eef1f8;
+      color: #3a4a6b;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 10px;
+    }
+
+    /* ── Summary sidebar card ── */
+    .summary-card {
+      background: #fff;
+      border: 1.5px solid #e2e6ed;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .summary-card h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 14px;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: #3a4a6b;
+      padding: 7px 0;
+      border-bottom: 1px solid #f0f2f6;
+    }
+    .summary-row:last-child { border-bottom: none; }
+    .summary-row .course-tag {
+      font-size: 11px;
+      font-family: "SF Mono", monospace;
+      background: #eef1f8;
+      color: #3a4a6b;
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+    .summary-total {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 700;
+      font-size: 14px;
+      color: #1e407c;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 2px solid #e2e6ed;
+    }
+
+    /* ── CTA button ── */
+    .cta-btn {
+      display: block;
+      width: 100%;
+      background: #1e407c;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 15px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      letter-spacing: .2px;
+      transition: background .15s;
+    }
+    .cta-btn:hover { background: #163260; }
+
+    /* Prereq tag */
+    .prereq-tag {
+      font-size: 11px;
+      background: #f0f2f6;
+      color: #5a6476;
+      padding: 1px 7px;
+      border-radius: 10px;
+      font-family: "SF Mono", monospace;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Top Navigation ── -->
+<nav class="topbar">
+  <div class="topbar-brand">
+    <span class="lion-mark">🦁</span>
+    <div class="brand-text">
+      <span class="brand-name">Lion University</span>
+      <span class="brand-portal">Student Portal</span>
+    </div>
+  </div>
+  <div class="topbar-user">
+    <div class="avatar">JG</div>
+    <span>Janni Gourde &nbsp;·&nbsp; ARTS Program</span>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- ── Page Header ── -->
+  <div class="page-header">
+    <h1>Course Registration — Fall 2026</h1>
+    <p>Select the courses you'd like to enroll in. Check availability and any approval requirements before submitting.</p>
+  </div>
+
+  <!-- ── Student Status Banner ── -->
+  <div class="status-banner">
+    <div class="icon">✅</div>
+    <div>
+      <strong>You're cleared to register.</strong>
+      Your application has been reviewed and you have been admitted to the Arts program.
+    </div>
+    <div class="status-label">Admitted</div>
+  </div>
+
+  <div class="section-label">Available Courses · Arts Program (ARTS)</div>
+
+  <!-- ── Course List ── -->
+  <div class="course-list">
+
+    <label class="course-card selected" for="arts101">
+      <input class="course-checkbox" type="checkbox" id="arts101" checked />
+      <div class="course-main">
+        <div class="course-id-row">
+          <span class="course-id">ARTS 101</span>
+          <span class="credits-chip">3 cr</span>
+        </div>
+        <div class="course-name">Introduction to Visual Arts</div>
+        <div class="course-meta">
+          <span class="meta-item"><span class="meta-icon">🕘</span> 9:00 AM</span>
+          <span class="meta-item"><span class="meta-icon">📍</span> Studio 3</span>
+          <span class="meta-item"><span class="meta-icon">🔓</span> No prerequisites</span>
+        </div>
+        <div class="open-note">
+          <span class="icon">✅</span>
+          You can register for this course directly — no advisor approval needed.
+        </div>
+      </div>
+      <span class="seats-badge seats-ok">25 seats open</span>
+    </label>
+
+    <label class="course-card" for="arts105">
+      <input class="course-checkbox" type="checkbox" id="arts105" />
+      <div class="course-main">
+        <div class="course-id-row">
+          <span class="course-id">ARTS 105</span>
+          <span class="credits-chip">3 cr</span>
+        </div>
+        <div class="course-name">Drawing Fundamentals</div>
+        <div class="course-meta">
+          <span class="meta-item"><span class="meta-icon">🕙</span> 10:30 AM</span>
+          <span class="meta-item"><span class="meta-icon">📍</span> Studio 4</span>
+          <span class="meta-item"><span class="meta-icon">🔓</span> No prerequisites</span>
+        </div>
+        <div class="open-note">
+          <span class="icon">✅</span>
+          You can register for this course directly — no advisor approval needed.
+        </div>
+      </div>
+      <span class="seats-badge seats-ok">20 seats open</span>
+    </label>
+
+    <label class="course-card selected" for="arts120">
+      <input class="course-checkbox" type="checkbox" id="arts120" checked />
+      <div class="course-main">
+        <div class="course-id-row">
+          <span class="course-id">ARTS 120</span>
+          <span class="credits-chip">3 cr</span>
+        </div>
+        <div class="course-name">Art History: Ancient to Renaissance</div>
+        <div class="course-meta">
+          <span class="meta-item"><span class="meta-icon">🕐</span> 1:30 PM</span>
+          <span class="meta-item"><span class="meta-icon">📍</span> Lecture Hall E</span>
+          <span class="meta-item"><span class="meta-icon">🔓</span> No prerequisites</span>
+        </div>
+        <div class="open-note">
+          <span class="icon">✅</span>
+          You can register for this course directly — no advisor approval needed.
+        </div>
+      </div>
+      <span class="seats-badge seats-ok">40 seats open</span>
+    </label>
+
+    <label class="course-card" for="arts210">
+      <input class="course-checkbox" type="checkbox" id="arts210" />
+      <div class="course-main">
+        <div class="course-id-row">
+          <span class="course-id">ARTS 210</span>
+          <span class="credits-chip">3 cr</span>
+        </div>
+        <div class="course-name">Modern Art Survey</div>
+        <div class="course-meta">
+          <span class="meta-item"><span class="meta-icon">🕚</span> 11:00 AM</span>
+          <span class="meta-item"><span class="meta-icon">📍</span> Studio 1</span>
+          <span class="meta-item"><span class="meta-icon">🔓</span> No prerequisites</span>
+        </div>
+        <div class="open-note">
+          <span class="icon">✅</span>
+          You can register for this course directly — no advisor approval needed.
+        </div>
+      </div>
+      <span class="seats-badge seats-ok">20 seats open</span>
+    </label>
+
+    <label class="course-card" for="arts315">
+      <input class="course-checkbox" type="checkbox" id="arts315" />
+      <div class="course-main">
+        <div class="course-id-row">
+          <span class="course-id">ARTS 315</span>
+          <span class="credits-chip">3 cr</span>
+          <span class="prereq-tag">Prereq: ARTS 210</span>
+        </div>
+        <div class="course-name">Museum Studies</div>
+        <div class="course-meta">
+          <span class="meta-item"><span class="meta-icon">🕑</span> 2:00 PM</span>
+          <span class="meta-item"><span class="meta-icon">📍</span> Studio 2</span>
+        </div>
+        <div class="advisor-note">
+          <span class="icon">⚠️</span>
+          <span><strong>Advisor approval required.</strong> Selecting this course will place your enrollment request in a pending state. Your advisor will review it before you're officially registered. You may still submit your other courses while this one is under review.</span>
+        </div>
+      </div>
+      <span class="seats-badge seats-ok">20 seats open</span>
+    </label>
+
+    <label class="course-card" for="arts420">
+      <input class="course-checkbox" type="checkbox" id="arts420" />
+      <div class="course-main">
+        <div class="course-id-row">
+          <span class="course-id">ARTS 420</span>
+          <span class="credits-chip">3 cr</span>
+          <span class="prereq-tag">Prereq: ARTS 315</span>
+        </div>
+        <div class="course-name">Curatorial Practice</div>
+        <div class="course-meta">
+          <span class="meta-item"><span class="meta-icon">🕓</span> 4:00 PM</span>
+          <span class="meta-item"><span class="meta-icon">📍</span> Gallery A</span>
+        </div>
+        <div class="advisor-note">
+          <span class="icon">⚠️</span>
+          <span><strong>Advisor approval required.</strong> Selecting this course will place your enrollment request in a pending state. Your advisor will review it before you're officially registered. You may still submit your other courses while this one is under review.</span>
+        </div>
+      </div>
+      <span class="seats-badge seats-low">4 seats left</span>
+    </label>
+
+  </div><!-- /.course-list -->
+
+  <!-- ── Selection Summary + CTA ── -->
+  <div class="summary-card">
+    <h3>Your Selection</h3>
+    <div class="summary-row">
+      <span><span class="course-tag">ARTS 101</span>&nbsp; Introduction to Visual Arts</span>
+      <span>3 cr</span>
+    </div>
+    <div class="summary-row">
+      <span><span class="course-tag">ARTS 120</span>&nbsp; Art History: Ancient to Renaissance</span>
+      <span>3 cr</span>
+    </div>
+    <div class="summary-total">
+      <span>Total Credits Selected</span>
+      <span>6 credits</span>
+    </div>
+  </div>
+
+  <button class="cta-btn">
+    Continue to Register →
+  </button>
+
+</div><!-- /.page -->
+</body>
+</html>

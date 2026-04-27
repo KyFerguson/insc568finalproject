@@ -4,6 +4,9 @@ info:
   version: 1.0.0
   description: >-
     API for creating an initial student application record.
+  contact:
+    name: Ky Ferguson
+    email: kkf5375@psu.edu
 
 servers:
   - url: https://localhost:3000
@@ -21,6 +24,7 @@ paths:
         - Health
       summary: Health check
       operationId: getHealth
+      description: Returns a simple status check confirming the service is running.
       responses:
         '200':
           description: Service is healthy
@@ -172,8 +176,9 @@ paths:
       summary: Get enrollment info for a student
       description: >-
         Returns acceptance status, program details, and available courses for
-        enrollment based on the student's program. Caller can provide either
-        studentId or emailAddress query parameter.
+        enrollment based on the student's program. Caller may provide either
+        studentId or emailAddress, or both. If both are provided, they must
+        resolve to the same student record; a mismatch returns 401.
       operationId: getEnrollmentInfo
       parameters:
         - name: studentId
@@ -201,12 +206,138 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: studentId and emailAddress were both provided but do not match the same student
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Student not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unexpected server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/students/admit:
+    post:
+      tags:
+        - Students
+      summary: Admit a student applicant
+      description: >-
+        Updates a student's academic status from 'applicant' to 'admitted'.
+        Only students currently in 'applicant' status may be admitted.
+      operationId: admitStudent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdmitStudentRequest'
+            examples:
+              default:
+                value:
+                  studentId: STU002
+      responses:
+        '200':
+          description: Student admitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdmitStudentResponse'
+        '400':
+          description: Missing required field
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Student not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Student is not in applicant status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                wrongStatus:
+                  value:
+                    error: "Student status is 'enrolled', must be 'applicant' to admit"
+        '500':
+          description: Unexpected server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/enrollments/approve-course:
+    post:
+      tags:
+        - Enrollment
+      summary: Approve a course enrollment (advisor review)
+      description: >-
+        Advances a course enrollment that is in 'Pending Advisor' status.
+        The advisor may either approve the enrollment (moving it to 'Registered')
+        or flag it for instructor review (moving it to 'Pending Instructor').
+      operationId: approveCourseEnrollment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApproveCourseRequest'
+            examples:
+              approve:
+                value:
+                  enrollmentId: ENR001
+                  decision: approve
+              pendingInstructor:
+                value:
+                  enrollmentId: ENR001
+                  decision: pending_instructor
+      responses:
+        '200':
+          description: Enrollment status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApproveCourseResponse'
+        '400':
+          description: Missing or invalid field
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidDecision:
+                  value:
+                    error: "Invalid decision 'reject'. Must be 'approve' or 'pending_instructor'"
+        '404':
+          description: Enrollment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Enrollment is not in Pending Advisor status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                wrongStatus:
+                  value:
+                    error: "Enrollment status is 'Registered', must be 'Pending Advisor' to approve"
         '500':
           description: Unexpected server error
           content:
@@ -371,6 +502,12 @@ components:
                     - programName
                 statusType:
                   type: string
+                  enum:
+                    - applicant
+                    - admitted
+                    - enrolled
+                    - probation
+                  description: The student's current academic standing.
               required:
                 - studentId
                 - program
@@ -453,6 +590,12 @@ components:
           type: string
         statusType:
           type: string
+          enum:
+            - applicant
+            - admitted
+            - enrolled
+            - probation
+          description: The student's current academic standing.
         remark:
           type: string
         createdAt:
@@ -467,47 +610,6 @@ components:
         - createdAt
         - updatedAt
 
-    FeeRecord:
-      type: object
-      properties:
-        feeId:
-          type: string
-        feePerCredit:
-          type: number
-        specialRate:
-          type: number
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-      required:
-        - feeId
-        - createdAt
-        - updatedAt
-
-    PaymentRecord:
-      type: object
-      properties:
-        paymentId:
-          type: string
-        startingBalance:
-          type: number
-        status:
-          type: string
-        remainingBalance:
-          type: number
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-      required:
-        - paymentId
-        - createdAt
-        - updatedAt
 
     EnrollmentRecord:
       type: object
@@ -522,6 +624,17 @@ components:
           type: number
         feeID:
           type: string
+        status:
+          type: string
+          enum:
+            - Requested
+            - Pending Advisor
+            - Pending Instructor
+            - Registered
+          description: >-
+            Lifecycle state of the enrollment. 'Requested' is the initial state;
+            'Pending Advisor' indicates advisor review is required; 'Pending Instructor'
+            indicates further instructor review; 'Registered' is the final approved state.
         createdAt:
           type: string
           format: date-time
@@ -534,6 +647,7 @@ components:
         - courseScheduleId
         - credit
         - feeID
+        - status
         - createdAt
         - updatedAt
 
@@ -546,6 +660,10 @@ components:
           type: string
         courseName:
           type: string
+        courseDescriptionUrl:
+          type: string
+          format: uri
+          description: Link to the course description page.
         sectionNo:
           type: integer
         semester:
@@ -560,10 +678,17 @@ components:
           type: string
         availability:
           type: boolean
+        requiresAdvisorApproval:
+          type: boolean
+          description: >-
+            When true, the student's enrollment request must be reviewed and
+            approved by an advisor before it advances past the Pending Advisor
+            status.
       required:
         - courseScheduleID
         - courseID
         - courseName
+        - requiresAdvisorApproval
 
     EnrollmentInfo:
       type: object
@@ -586,6 +711,12 @@ components:
           properties:
             statusType:
               type: string
+              enum:
+                - applicant
+                - admitted
+                - enrolled
+                - probation
+              description: The student's current academic standing.
             canRegister:
               type: boolean
           required:
@@ -627,8 +758,6 @@ components:
           items:
             type: string
             minLength: 1
-        feeID:
-          type: string
       required:
         - studentId
         - courseScheduleIds
@@ -662,6 +791,117 @@ components:
           type: string
         data:
           $ref: '#/components/schemas/EnrollmentSubmissionSummary'
+      required:
+        - message
+        - data
+
+    AdmitStudentRequest:
+      type: object
+      properties:
+        studentId:
+          type: string
+          minLength: 1
+      required:
+        - studentId
+      additionalProperties: false
+
+    AdmitStudentResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            student:
+              type: object
+              properties:
+                studentId:
+                  type: string
+                name:
+                  type: string
+              required:
+                - studentId
+                - name
+            academicStatus:
+              type: object
+              properties:
+                academicStatusID:
+                  type: string
+                statusType:
+                  type: string
+                  enum:
+                    - applicant
+                    - admitted
+                    - enrolled
+                    - probation
+                  description: The student's current academic standing.
+                remark:
+                  type: string
+                updatedAt:
+                  type: string
+                  format: date-time
+              required:
+                - academicStatusID
+                - statusType
+                - updatedAt
+          required:
+            - student
+            - academicStatus
+      required:
+        - message
+        - data
+
+    ApproveCourseRequest:
+      type: object
+      properties:
+        enrollmentId:
+          type: string
+          minLength: 1
+        decision:
+          type: string
+          enum:
+            - approve
+            - pending_instructor
+          description: "'approve' moves the enrollment to Registered. 'pending_instructor' moves it to Pending Instructor."
+      required:
+        - enrollmentId
+        - decision
+      additionalProperties: false
+
+    ApproveCourseResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            enrollment:
+              type: object
+              properties:
+                enrollmentId:
+                  type: string
+                studentId:
+                  type: string
+                courseScheduleId:
+                  type: string
+                status:
+                  type: string
+                  enum:
+                    - Registered
+                    - Pending Instructor
+                updatedAt:
+                  type: string
+                  format: date-time
+              required:
+                - enrollmentId
+                - studentId
+                - courseScheduleId
+                - status
+                - updatedAt
+          required:
+            - enrollment
       required:
         - message
         - data

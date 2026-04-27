@@ -11,6 +11,7 @@
       "facultyID": "123456789",
       "specialNeeds": "N/A",
       "availability": true,
+      "requiresAdvisorApproval": false,
       "createdAt": "2026-04-17T10:00:00Z",
       "updatedAt": "2026-04-20T00:05:00Z"
     },
@@ -25,6 +26,7 @@
       "facultyID": "987654321",
       "specialNeeds": "N/A",
       "availability": true,
+      "requiresAdvisorApproval": false,
       "createdAt": "2026-04-17T10:00:00Z",
       "updatedAt": "2026-04-17T10:00:00Z"
     },
@@ -39,6 +41,7 @@
       "facultyID": "123456789",
       "specialNeeds": "N/A",
       "availability": true,
+      "requiresAdvisorApproval": false,
       "createdAt": "2026-04-17T10:00:00Z",
       "updatedAt": "2026-04-20T00:13:32.397Z"
     },
@@ -53,6 +56,7 @@
       "facultyID": "987654321",
       "specialNeeds": "N/A",
       "availability": true,
+      "requiresAdvisorApproval": false,
       "createdAt": "2026-04-17T10:00:00Z",
       "updatedAt": "2026-04-20T00:13:32.397Z"
     },
@@ -67,6 +71,7 @@
       "facultyID": "445566778",
       "specialNeeds": "N/A",
       "availability": true,
+      "requiresAdvisorApproval": false,
       "createdAt": "2026-04-17T10:00:00Z",
       "updatedAt": "2026-04-17T10:00:00Z"
     },
@@ -77,12 +82,13 @@
       "scheduleTime": "2:00 PM",
       "location": "Studio 2",
       "capacity": 20,
-      "enrolledCount": 0,
+      "enrolledCount": 2,
       "facultyID": "445566778",
       "specialNeeds": "N/A",
       "availability": true,
+      "requiresAdvisorApproval": true,
       "createdAt": "2026-04-17T10:00:00Z",
-      "updatedAt": "2026-04-17T10:00:00Z"
+      "updatedAt": "2026-04-27T00:18:44.884Z"
     },
     {
       "courseScheduleID": "ARTS 420 F2026",
@@ -91,12 +97,58 @@
       "scheduleTime": "4:00 PM",
       "location": "Gallery A",
       "capacity": 18,
+      "enrolledCount": 1,
+      "facultyID": "445566778",
+      "specialNeeds": "N/A",
+      "availability": true,
+      "requiresAdvisorApproval": true,
+      "createdAt": "2026-04-17T10:00:00Z",
+      "updatedAt": "2026-04-27T01:32:36.984Z"
+    },
+    {
+      "courseScheduleID": "ARTS 101 F2026",
+      "courseID": "ARTS 101",
+      "semester": "F2026",
+      "scheduleTime": "9:00 AM",
+      "location": "Studio 3",
+      "capacity": 25,
+      "enrolledCount": 2,
+      "facultyID": "445566778",
+      "specialNeeds": "N/A",
+      "availability": true,
+      "requiresAdvisorApproval": false,
+      "createdAt": "2026-04-26T10:00:00Z",
+      "updatedAt": "2026-04-27T00:18:44.884Z"
+    },
+    {
+      "courseScheduleID": "ARTS 105 F2026",
+      "courseID": "ARTS 105",
+      "semester": "F2026",
+      "scheduleTime": "10:30 AM",
+      "location": "Studio 4",
+      "capacity": 20,
       "enrolledCount": 0,
       "facultyID": "445566778",
       "specialNeeds": "N/A",
       "availability": true,
-      "createdAt": "2026-04-17T10:00:00Z",
-      "updatedAt": "2026-04-17T10:00:00Z"
+      "requiresAdvisorApproval": false,
+      "createdAt": "2026-04-26T10:00:00Z",
+      "updatedAt": "2026-04-26T10:00:00Z"
+    },
+    {
+      "courseScheduleID": "ARTS 120 F2026",
+      "courseID": "ARTS 120",
+      "semester": "F2026",
+      "scheduleTime": "1:30 PM",
+      "location": "Lecture Hall E",
+      "capacity": 40,
+      "enrolledCount": 0,
+      "facultyID": "445566778",
+      "specialNeeds": "N/A",
+      "availability": true,
+      "requiresAdvisorApproval": false,
+      "createdAt": "2026-04-26T10:00:00Z",
+      "updatedAt": "2026-04-26T10:00:00Z"
     },
     {
       "courseScheduleID": "ECON 201 F2026",
@@ -109,6 +161,7 @@
       "facultyID": "332211009",
       "specialNeeds": "N/A",
       "availability": true,
+      "requiresAdvisorApproval": false,
       "createdAt": "2026-04-17T10:00:00Z",
       "updatedAt": "2026-04-17T10:00:00Z"
     },
@@ -123,6 +176,7 @@
       "facultyID": "332211009",
       "specialNeeds": "N/A",
       "availability": true,
+      "requiresAdvisorApproval": false,
       "createdAt": "2026-04-17T10:00:00Z",
       "updatedAt": "2026-04-17T10:00:00Z"
     },
@@ -137,6 +191,7 @@
       "facultyID": "332211009",
       "specialNeeds": "N/A",
       "availability": true,
+      "requiresAdvisorApproval": false,
       "createdAt": "2026-04-17T10:00:00Z",
       "updatedAt": "2026-04-17T10:00:00Z"
     }

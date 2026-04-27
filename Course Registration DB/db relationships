@@ -8,3 +8,5 @@ student_course.studentID = secondary key
 faculty.facultyID = primary key
 course_schedule.facultyID = secondary key
 
+course.requiresAdvisorApproval = boolean field on course and course_schedule; when true, enrollment status must pass through Pending Advisor before reaching Registered
+
